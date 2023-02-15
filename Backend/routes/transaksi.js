@@ -86,7 +86,6 @@ app.post("/", async (req, res) => {
         id_meja: req.body.id_meja,
         nama_pelanggan: req.body.nama_pelanggan,
         status: req.body.status,
-        jenis_pesanan: req.body.jenis_pesanan
     }
     transaksi.create(data_transaksi)
         .then(result => {
@@ -145,5 +144,7 @@ app.delete("/:id", async (req, res) => {
     }
 
 })
+
+
 
 module.exports = app

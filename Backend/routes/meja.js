@@ -49,7 +49,7 @@ app.get("/:id_meja", (req, res) => {
 //endpoint untuk menyimpan data admin, METHOD: POST, function: create
 app.post("/", (req, res) => {
     let data = {
-        nomor_meja: req.body.nomor_meja,
+        meja: req.body.meja,
     }
 
 
@@ -72,7 +72,7 @@ app.put("/:id_meja", (req, res) => {
         id_meja: req.params.id_meja
     }
     let data = {
-        nomor_meja: req.body.nomor_meja,
+        meja: req.body.meja,
     }
     meja.update(data, { where: param })
         .then(result => {

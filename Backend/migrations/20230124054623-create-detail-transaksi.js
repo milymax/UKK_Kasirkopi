@@ -25,8 +25,8 @@ module.exports = {
           key: "id_menu"
         }
       },
-      harga: {
-        type: Sequelize.DOUBLE
+      qty: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
