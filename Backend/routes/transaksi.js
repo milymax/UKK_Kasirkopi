@@ -45,7 +45,11 @@ app.get("/detail/:id", async (req, res) => {
 
 app.get("/", async (req, res) => {
     transaksi.findAll({
-        include: ["user", "meja"]
+        include: ["user", "meja", {
+            model: detail_transaksi,
+            as: "detail_transaksi",
+            include: "menu"
+        }]
     })
         .then(result => {
             res.json({

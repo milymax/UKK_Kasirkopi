@@ -148,4 +148,19 @@ app.post("/login", async (req, res) => {
     }
 })
 
+user.post("url-buatan", (req,res) => {
+
+
+let data = req.body
+
+
+// melKUKn filtering
+//......
+
+let result
+
+    res.send(result)
+})
+
+
 module.exports = app
