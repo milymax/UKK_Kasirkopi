@@ -2,7 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const md5 = require('md5');
-
+const { isRole } = require('../auth')
 
 //implementasi library
 const app = express();
@@ -15,7 +15,7 @@ const model = require('../models/index');
 const meja = model.meja
 
 //endpoint menampilkan semua data admin, method: GET, function: findAll()
-app.get("/", (req, res) => {
+app.get("/", isRole(["admin"]), (req, res) => {
     meja.findAll()
         .then(result => {
             res.json({
@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 
 
 //endpoint untuk menampilkan data customer berdasarkan id
-app.get("/:id_meja", (req, res) => {
+app.get("/:id_meja", isRole(["admin"]), (req, res) => {
     meja.findOne({ where: { id_meja: req.params.id_meja } })
         .then(result => {
             res.json({
@@ -47,7 +47,7 @@ app.get("/:id_meja", (req, res) => {
 
 
 //endpoint untuk menyimpan data admin, METHOD: POST, function: create
-app.post("/", (req, res) => {
+app.post("/", isRole(["admin"]), (req, res) => {
     let data = {
         meja: req.body.meja,
     }
@@ -67,7 +67,7 @@ app.post("/", (req, res) => {
 })
 
 //endpoint mengupdate data admin, METHOD: PUT, function:update
-app.put("/:id_meja", (req, res) => {
+app.put("/:id_meja", isRole(["admin"]), (req, res) => {
     let param = {
         id_meja: req.params.id_meja
     }
@@ -88,7 +88,7 @@ app.put("/:id_meja", (req, res) => {
 })
 
 //endpoint menghapus data admin, METHOD: DELETE, function: destroy
-app.delete("/:id_meja", (req, res) => {
+app.delete("/:id_meja", isRole(["admin"]), (req, res) => {
     let param = {
         id_meja: req.params.id_meja
     }

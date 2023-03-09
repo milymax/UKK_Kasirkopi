@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const md5 = require("md5")
 const jwt = require("jsonwebtoken")
 const SECRET_KEY = "INIKASIR"
-const auth = require("../auth")
+const { isRole } = require("../auth")
 
 //implementasi library
 const app = express();
@@ -14,10 +14,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //import model
 const model = require('../models/index');
+// const model = require('../models/index').user
 const user = model.user
 
 //endpoint menampilkan semua data admin, method: GET, function: findAll()
-app.get("/", auth, async (req, res) => {
+app.get("/", isRole(["admin"]), async (req, res) => {
     user.findAll()
         .then(result => {
             res.json({
@@ -31,7 +32,7 @@ app.get("/", auth, async (req, res) => {
         })
 })
 
-app.get("/:id", auth, async (req, res) => {
+app.get("/:id", isRole(["admin"]), async (req, res) => {
     let param = {
         id_user: req.params.id
     }
@@ -48,24 +49,24 @@ app.get("/:id", auth, async (req, res) => {
         })
 })
 
-app.get("/user/:role", auth, async (req, res) => {
-    let param = {
-        role: req.params.role
-    }
-    user.findAll({ where: param })
-        .then(result => {
-            res.json({
-                data: result
-            })
-        })
-        .catch(error => {
-            res.json({
-                message: error.message
-            })
-        })
-})
+// app.get("/:role", auth.isAdmin, async (req, res) => {
+//     let param = {
+//         role: req.params.role
+//     }
+//     user.findAll({ where: param })
+//         .then(result => {
+//             res.json({
+//                 data: result
+//             })
+//         })
+//         .catch(error => {
+//             res.json({
+//                 message: error.message
+//             })
+//         })
+// })
 
-app.post("/", auth, async (req, res) => {
+app.post("/", isRole(["admin"]), async (req, res) => {
     let data = {
         nama_user: req.body.nama_user,
         role: req.body.role,
@@ -86,9 +87,9 @@ app.post("/", auth, async (req, res) => {
         })
 })
 
-app.put("/", auth, async (req, res) => {
+app.put("/:id", isRole(["admin"]), async (req, res) => {
     let param = {
-        id_user: req.body.id_user
+        id_user: req.params.id
     }
     let data = {
         nama_user: req.body.nama_user,
@@ -109,7 +110,7 @@ app.put("/", auth, async (req, res) => {
         })
 })
 
-app.delete("/:id", auth, async (req, res) => {
+app.delete("/:id", isRole(["admin"]), async (req, res) => {
     let param = {
         id_user: req.params.id
     }
@@ -126,7 +127,7 @@ app.delete("/:id", auth, async (req, res) => {
         })
 })
 //LOGIN
-app.post("/login", async (req, res) => {
+app.post("/login",  async (req, res) => {
     let param = {
         username: req.body.username,
         password: md5(req.body.password),
@@ -146,20 +147,6 @@ app.post("/login", async (req, res) => {
             message: "Username atau Password salah"
         })
     }
-})
-
-user.post("url-buatan", (req,res) => {
-
-
-let data = req.body
-
-
-// melKUKn filtering
-//......
-
-let result
-
-    res.send(result)
 })
 
 

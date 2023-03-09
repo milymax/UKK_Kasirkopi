@@ -4,12 +4,14 @@ const menu = require("../models/index").menu
 const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
+const { Op } = require("sequelize")
 
-const auth = require("../auth")
+const { isRole } = require("../auth")
 const SECRET_KEY = "INIPUNYAKASIR"
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -21,7 +23,8 @@ const storage = multer.diskStorage({
 })
 let upload = multer({ storage: storage })
 
-app.get("/", auth, async (req, res) => {
+
+app.get("/", isRole(["admin"]), async (req, res) => {
     menu.findAll()
         .then(result => {
             res.json({
@@ -35,7 +38,7 @@ app.get("/", auth, async (req, res) => {
         })
 })
 
-app.get("/:id", auth, async (req, res) => {
+app.get("/:id", isRole(["admin"]), async (req, res) => {
     let param = {
         id_menu: req.params.id
     }
@@ -52,7 +55,7 @@ app.get("/:id", auth, async (req, res) => {
         })
 })
 
-app.post("/", upload.single("gambar"), auth, async (req, res) => {
+app.post("/", upload.single("gambar"), isRole(["admin"]), async (req, res) => {
     if (!req.file) {
         res.json({
             message: "File Tidak Ada!"
@@ -80,9 +83,9 @@ app.post("/", upload.single("gambar"), auth, async (req, res) => {
     }
 })
 
-app.put("/", upload.single("gambar"), auth, async (req, res) => {
+app.put("/:id_menu", upload.single("gambar"), isRole(["admin"]), auth, async (req, res) => {
     let param = {
-        id_menu: req.body.id_menu
+        id_menu: req.params.id_menu
     }
     let data = {
         nama_menu: req.body.nama_menu,
@@ -120,7 +123,7 @@ app.put("/", upload.single("gambar"), auth, async (req, res) => {
         })
 })
 
-app.delete("/:id", auth, async (req, res) => {
+app.delete("/:id", auth, isRole(["admin"]), async (req, res) => {
     try {
         let param = { id_menu: req.params.id }
         let result = await menu.findOne({ where: param })
@@ -150,5 +153,73 @@ app.delete("/:id", auth, async (req, res) => {
         })
     }
 })
+//\ !----------------------------------------------------------------------------------------------------
+//search for menu, method:post
+
+app.post("/search/:keyword", async (req, res) => {
+    let keyword = req.params.keyword //keyword?
+    let result = await menu.findAll({
+        where: {
+            [Op.or]: [
+                {
+                    id_menu: {
+                        [Op.like]: `%${keyword}%`
+                    }
+                },
+                {
+                    nama_menu: {
+                        [Op.like]: `%${keyword}%`
+                    }
+                },
+                {
+                    jenis: {
+                        [Op.like]: `%${keyword}%`
+                    }
+                },
+                {
+                    deskripsi: {
+                        [Op.like]: `%${keyword}%`
+                    }
+                },
+                {
+                    harga: {
+                        [Op.like]: `%${keyword}%`
+                    }
+                },
+            ]
+        }
+    })
+    res.json({
+        menu: result
+    })
+})
+
+//\!---------------------------------------------------------------------------------------------------- 
+
+//mendapatkan menu terlaris
+app.get("/terlaris", isRole(["manajer"]), async (req, res) => {
+    try {
+        const result = await detail_transaksi.findAll({
+            attributes: [
+                'id_menu',
+                [models.sequelize.fn('sum', models.sequelize.col('qty')), 'total_penjualan']
+            ],
+            include: [
+                {
+                    model: menu,
+                    as: 'menu',
+                    // where: { jenis: 'makanan' },
+                    attributes: ['nama_menu']
+                }
+            ],
+            group: ['id_menu'],
+            order: [[models.sequelize.fn('sum', models.sequelize.col('qty')), 'DESC']]
+        });
+        res.status(200).json({ menu: result });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 module.exports = app
