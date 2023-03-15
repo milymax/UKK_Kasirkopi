@@ -4,4 +4,4 @@ Catatan Backend:
 2. search berdasarkan keyword masih tidak bisa vvv
 3. filtering /terlaris masih belum bisa 
 4. menetukan nomor meja yang tersedia di bagian kasir
-5. 
+5. membenarkan tanggal transaksi (otomatis)

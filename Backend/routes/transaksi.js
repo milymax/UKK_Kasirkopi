@@ -3,13 +3,13 @@ const app = express()
 const moment = require("moment")
 const transaksi = require("../models/index").transaksi
 const detail_transaksi = require("../models/index").detail_transaksi
-const { Op } = require ('sequelize')
+const { Op } = require('sequelize')
 const { isRole } = require("../auth")
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.get("/detail", isRole(["kasir, manajer"]), async (req, res) => {
+app.get("/detail", isRole(["kasir", "manajer"]), async (req, res) => {
     detail_transaksi.findAll({
         include: ["transaksi", "menu"]
     })
@@ -25,7 +25,7 @@ app.get("/detail", isRole(["kasir, manajer"]), async (req, res) => {
         })
 })
 
-app.get("/detail/:id", isRole(["kasir, manajer"]), async (req, res) => {
+app.get("/detail/:id", isRole(["kasir"]), async (req, res) => {
     let param = {
         id_transaksi: req.params.id
     }
@@ -45,7 +45,7 @@ app.get("/detail/:id", isRole(["kasir, manajer"]), async (req, res) => {
         })
 })
 
-app.get("/", isRole(["kasir, manajer"]) , async (req, res) => {
+app.get("/", isRole(["kasir","manajer"]), async (req, res) => {
     transaksi.findAll({
         include: ["user", "meja", {
             model: detail_transaksi,
@@ -65,15 +65,15 @@ app.get("/", isRole(["kasir, manajer"]) , async (req, res) => {
         })
 })
 
-app.get("/:id", isRole(["kasir, manajer"]), async (req, res) => {
+app.get("/:id", isRole(["kasir"]), async (req, res) => {
     let param = {
         id_transaksi: req.params.id
     }
     transaksi.findAll({
-        include: ["user", "meja",{
-        model: detail_transaksi,
-        as: "detail_transaksi"
-    }],
+        include: ["user", "meja", {
+            model: detail_transaksi,
+            as: "detail_transaksi"
+        }],
         where: param
     })
         .then(result => {
@@ -88,10 +88,11 @@ app.get("/:id", isRole(["kasir, manajer"]), async (req, res) => {
         })
 })
 
-app.post("/", isRole(["kasir, manajer"]), async (req, res) => {
+app.post("/", isRole(["kasir"]), async (req, res) => {
+    let current = new Date().toISOString().split('T')[0]
     let data_transaksi = {
-        tgl_transaksi: moment().format("YYYY-MM-DD"),
-        id_user: req.body.id_user,
+        tgl_transaksi: current,
+        id_user: req.body.id_user,//id_user manakah yang menangani
         id_meja: req.body.id_meja,
         nama_pelanggan: req.body.nama_pelanggan,
         status: req.body.status,
@@ -120,12 +121,12 @@ app.post("/", isRole(["kasir, manajer"]), async (req, res) => {
         })
 })
 
-app.put("/:id_transaksi", isRole(["kasir, manajer"]), async (req, res) => {
+app.put("/:id_transaksi", isRole(["kasir"]), async (req, res) => {
     let param = {
         id_transaksi: req.params.id_transaksi
     }
     let data_transaksi = {
-        id_user: req.body.id_user,
+        id_user: req.body.id_user, //id_user manakah yang menangani
         id_meja: req.body.id_meja,
         nama_pelanggan: req.body.nama_pelanggan,
         status: req.body.status,
@@ -146,7 +147,7 @@ app.put("/:id_transaksi", isRole(["kasir, manajer"]), async (req, res) => {
         })
 })
 
-app.delete("/:id", isRole(["kasir, manajer"]), async (req, res) => {
+app.delete("/:id", isRole(["kasir"]), async (req, res) => {
     let param = {
         id_transaksi: req.params.id
     }
