@@ -73,6 +73,7 @@ app.put("/:id_meja", isRole(["admin"]), (req, res) => {
     }
     let data = {
         meja: req.body.meja,
+        available: req.body.available
     }
     meja.update(data, { where: param })
         .then(result => {
